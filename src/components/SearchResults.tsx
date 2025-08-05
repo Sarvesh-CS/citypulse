@@ -3,9 +3,24 @@ import ContentCard from './ContentCard';
 
 interface SearchResultsProps {
   searchTerm: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   filteredResults: any[];
   onClearSearch: () => void;
 }
+
+// Helper function to group results by content type
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const groupResults = (results: any[]) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return results.reduce((groups: any, item) => {
+    const type = item.contentType || 'other';
+    if (!groups[type]) {
+      groups[type] = [];
+    }
+    groups[type].push(item);
+    return groups;
+  }, {});
+};
 
 export default function SearchResults({
   searchTerm,
@@ -14,12 +29,7 @@ export default function SearchResults({
 }: SearchResultsProps) {
   
   // Group results by content type
-  const groupedResults = filteredResults.reduce((acc: Record<string, any[]>, item) => {
-    const type = item.contentType || 'other';
-    if (!acc[type]) acc[type] = [];
-    acc[type].push(item);
-    return acc;
-  }, {});
+  const groupedResults = groupResults(filteredResults);
 
   // Content type display names and colors
   const contentTypeConfig = {
@@ -54,9 +64,9 @@ export default function SearchResults({
     <section id="search-results" className="py-16 bg-gray-50">
       <div className="container mx-auto px-6">
         <div className="flex justify-between items-center mb-8">
-          <h2 className="text-3xl font-bold text-gray-800">
-            Search Results for "{searchTerm}"
-          </h2>
+                  <h2 className="text-3xl font-bold text-gray-800">
+          Search Results for &quot;{searchTerm}&quot;
+        </h2>
           <button
             onClick={onClearSearch}
             className="px-4 py-2 text-sm bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
@@ -75,6 +85,7 @@ export default function SearchResults({
               
               {/* Category summary */}
               <div className="flex flex-wrap gap-2">
+                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                 {(Object.entries(groupedResults) as [string, any[]][]).map(([type, items]) => {
                   const config = contentTypeConfig[type as keyof typeof contentTypeConfig] || contentTypeConfig.other;
                   return (
@@ -83,7 +94,7 @@ export default function SearchResults({
                       className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${config.color}`}
                     >
                       <span className="mr-1">{config.icon}</span>
-                      {items.length} {config.name}
+                      {config.name}: {items.length}
                     </span>
                   );
                 })}
@@ -91,48 +102,52 @@ export default function SearchResults({
             </div>
 
             {/* Results by category */}
-            {(Object.entries(groupedResults) as [string, any[]][]).map(([type, items]) => {
-              const config = contentTypeConfig[type as keyof typeof contentTypeConfig] || contentTypeConfig.other;
-              
-              return (
-                <div key={type} className="space-y-4">
-                  <div className="flex items-center space-x-3">
-                    <span className="text-2xl">{config.icon}</span>
-                    <h3 className="text-2xl font-bold text-gray-800">{config.name}</h3>
-                    <span className={`px-2 py-1 rounded-full text-sm font-medium ${config.color}`}>
-                      {items.length} result(s)
-                    </span>
-                  </div>
-                  
-                  <div className="space-y-6">
-                    {items.map((item: any) => (
-                      <div key={item.uid || `${type}-${Math.random()}`} className="relative">
-                        {/* Content type badge */}
-                        <div className="absolute top-4 right-4 z-10">
-                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${config.color}`}>
-                            {config.icon} {config.name.slice(0, -1)}
-                          </span>
+            <div className="space-y-8">
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+              {(Object.entries(groupedResults) as [string, any[]][]).map(([type, items]) => {
+                const config = contentTypeConfig[type as keyof typeof contentTypeConfig] || contentTypeConfig.other;
+                
+                return (
+                  <div key={type} className="space-y-4">
+                    <div className="flex items-center space-x-3">
+                      <span className="text-2xl">{config.icon}</span>
+                      <h3 className="text-2xl font-bold text-gray-800">{config.name}</h3>
+                      <span className={`px-2 py-1 rounded-full text-sm font-medium ${config.color}`}>
+                        {items.length} result(s)
+                      </span>
+                    </div>
+                    
+                    <div className="space-y-6">
+                      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                      {items.map((item: any) => (
+                        <div key={item.uid || `${type}-${Math.random()}`} className="relative w-full">
+                          {/* Content type badge */}
+                          <div className="absolute top-4 right-4 z-10">
+                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${config.color}`}>
+                              {config.icon} {config.name.slice(0, -1)}
+                            </span>
+                          </div>
+                          
+                          <ContentCard 
+                            data={item.sourceData || {}} 
+                            name={item.name || item.title || 'Unnamed'} 
+                            price={item.price || 'Price not available'} 
+                            rating={item.rating?.value?.toString() || item.rating?.toString() || '0'} 
+                            duration={item.duration || 'Duration not specified'}
+                            location={item.location || 'Location not specified'}
+                            group_size={item.group_size || item.capacity || 'Not specified'}
+                            image={item.image || []} 
+                            description={item.info || item.description || 'No description available'} 
+                            button_text={item.book_now_btn || item.reserve_btn || item.book_btn || 'Book Now'} 
+                            button_url="#" 
+                          />
                         </div>
-                        
-                        <ContentCard 
-                          data={item.sourceData || {}} 
-                          name={item.name || item.title || 'Unnamed'} 
-                          price={item.price || 'Price not available'} 
-                          rating={item.rating?.value?.toString() || item.rating?.toString() || '0'} 
-                          duration={item.duration || 'Duration not specified'}
-                          location={item.location || 'Location not specified'}
-                          group_size={item.group_size || item.capacity || 'Not specified'}
-                          image={item.image || []} 
-                          description={item.info || item.description || 'No description available'} 
-                          button_text={item.book_now_btn || item.reserve_btn || item.book_btn || 'Book Now'} 
-                          button_url="#" 
-                        />
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         ) : (
           <div className="text-center py-12">

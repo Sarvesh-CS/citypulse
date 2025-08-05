@@ -29,8 +29,18 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const header = await getEntry('header', headerUid);
+  // Try to fetch header data, but provide fallback if headerUid is empty or data is not found
+  let header = null;
+  if (headerUid) {
+    try {
+      header = await getEntry('header', headerUid);
+    } catch (error) {
+      console.warn('Failed to fetch header data:', error);
+    }
+  }
+  
   const footer = await getEntry('footer', footerUid);
+  
   return (
     <html lang="en">
       <body

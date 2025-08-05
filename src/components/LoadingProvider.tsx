@@ -1,96 +1,87 @@
 "use client"
-import React, { createContext, useContext, useState, useEffect } from 'react'
-import { usePathname, useSearchParams } from 'next/navigation'
-import LoadingSpinner from './LoadingSpinner'
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { usePathname, useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
+import LoadingSpinner from './LoadingSpinner';
 
 interface LoadingContextType {
   isLoading: boolean;
   setLoading: (loading: boolean) => void;
 }
 
-const LoadingContext = createContext<LoadingContextType>({
-  isLoading: false,
-  setLoading: () => {},
-});
+const LoadingContext = createContext<LoadingContextType | undefined>(undefined);
 
-export const useLoading = () => useContext(LoadingContext);
+export const useLoading = () => {
+  const context = useContext(LoadingContext);
+  if (context === undefined) {
+    throw new Error('useLoading must be used within a LoadingProvider');
+  }
+  return context;
+};
 
-interface LoadingProviderProps {
-  children: React.ReactNode;
-}
-
-export default function LoadingProvider({ children }: LoadingProviderProps) {
+function LoadingProviderInner({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(false);
-  const [isNavigating, setIsNavigating] = useState(false);
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const setLoading = (loading: boolean) => {
-    setIsLoading(loading);
-  };
-
-  // Listen for link clicks
+  // Auto-hide loading when navigation completes
   useEffect(() => {
-    const handleLinkClick = (e: Event) => {
-      const target = e.target as HTMLElement;
-      const link = target.closest('a');
-      
-      if (link && link.href) {
-        try {
-          const url = new URL(link.href);
-          const currentUrl = new URL(window.location.href);
-          
-          // Check if it's internal navigation to a different page
-          if (url.origin === currentUrl.origin && 
-              url.pathname !== currentUrl.pathname &&
-              !link.href.startsWith('#') && 
-              !link.href.includes('mailto:') && 
-              !link.href.includes('tel:')) {
-            
-            setIsNavigating(true);
-            setIsLoading(true);
-          }
-        } catch (error) {
-          // Ignore invalid URLs
-        }
-      }
-    };
+    setIsLoading(false);
+  }, [pathname, searchParams]);
 
-    document.addEventListener('click', handleLinkClick);
-
-    return () => {
-      document.removeEventListener('click', handleLinkClick);
-    };
-  }, []);
-
-  // Hide loading when navigation completes
-  useEffect(() => {
-    if (isNavigating) {
-      const timer = setTimeout(() => {
-        setIsNavigating(false);
-        setIsLoading(false);
-      }, 100);
-
-      return () => clearTimeout(timer);
-    }
-  }, [pathname, searchParams, isNavigating]);
-
-  // Emergency timeout
+  // Emergency timeout to hide loading after 5 seconds
   useEffect(() => {
     if (isLoading) {
       const timeout = setTimeout(() => {
+        console.warn('Loading took too long, hiding spinner');
         setIsLoading(false);
-        setIsNavigating(false);
       }, 5000);
 
       return () => clearTimeout(timeout);
     }
   }, [isLoading]);
 
+  // Listen for navigation events to show loading
+  useEffect(() => {
+    const handleClick = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      const link = target.closest('a');
+      
+      if (link && link.href) {
+        try {
+          const url = new URL(link.href);
+          
+          // Only show loading for internal navigation
+          if (url.origin === window.location.origin && url.pathname !== pathname) {
+            setIsLoading(true);
+          }
+        } catch (err) {
+          console.warn('Error setting up navigation loading:', err);
+        }
+      }
+    };
+
+    document.addEventListener('click', handleClick);
+    return () => document.removeEventListener('click', handleClick);
+  }, [pathname]);
+
+  const value = {
+    isLoading,
+    setLoading: setIsLoading,
+  };
+
   return (
-    <LoadingContext.Provider value={{ isLoading, setLoading }}>
+    <LoadingContext.Provider value={value}>
       {children}
-      <LoadingSpinner isVisible={isLoading} />
+      {isLoading && <LoadingSpinner />}
     </LoadingContext.Provider>
+  );
+}
+
+export default function LoadingProvider({ children }: { children: ReactNode }) {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoadingProviderInner>{children}</LoadingProviderInner>
+    </Suspense>
   );
 } 

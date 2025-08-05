@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Stack from '../../lib/contentstack';
-import { getEntry, getEntries } from '../../lib/contentstack-utils';
+import { getEntry } from '../../lib/contentstack-utils';
 import HeroSection from './HeroSection';
 import SearchResults from './SearchResults';
 import StatsSection from './StatsSection';
@@ -15,7 +15,9 @@ const hotelsPageUid = process.env.NEXT_PUBLIC_HOTELS_PAGE_UID || '';
 const restaurantsPageUid = process.env.NEXT_PUBLIC_RESTAURANTS_PAGE_UID || '';
 
 export default function Homepage() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [data, setData] = useState<any>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [allContentData, setAllContentData] = useState<any>({
     tours: null,
     events: null,
@@ -24,6 +26,7 @@ export default function Homepage() {
   });
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [filteredResults, setFilteredResults] = useState<any[]>([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
@@ -101,12 +104,13 @@ export default function Homepage() {
   }, [isDataLoaded, setLoading]);
 
   const getAllSearchableItems = () => {
-    const searchableItems: any[] = [];
+    const searchableItems: Record<string, unknown>[] = [];
     
     // Add tours
     if (allContentData.tours?.content_cards?.[0]?.content_card?.info_card) {
       const tours = allContentData.tours.content_cards[0].content_card.info_card;
       console.log('Adding tours to search:', tours.length);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       tours.forEach((item: any) => {
         searchableItems.push({
           ...item,
@@ -120,6 +124,7 @@ export default function Homepage() {
     if (allContentData.events?.content_cards?.[0]?.content_card?.info_card) {
       const events = allContentData.events.content_cards[0].content_card.info_card;
       console.log('Adding events to search:', events.length);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       events.forEach((item: any) => {
         searchableItems.push({
           ...item,
@@ -133,6 +138,7 @@ export default function Homepage() {
     if (allContentData.hotels?.content_cards?.[0]?.content_card?.info_card) {
       const hotels = allContentData.hotels.content_cards[0].content_card.info_card;
       console.log('Adding hotels to search:', hotels.length);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       hotels.forEach((item: any) => {
         searchableItems.push({
           ...item,
@@ -146,6 +152,7 @@ export default function Homepage() {
     if (allContentData.restaurants?.content_cards?.[0]?.content_card?.info_card) {
       const restaurants = allContentData.restaurants.content_cards[0].content_card.info_card;
       console.log('Adding restaurants to search:', restaurants.length);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       restaurants.forEach((item: any) => {
         searchableItems.push({
           ...item,
@@ -193,6 +200,7 @@ export default function Homepage() {
       await new Promise(resolve => setTimeout(resolve, 300));
       
       // Filter across all content types based on name, location, or description
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const filtered = allItems.filter((item: any) => {
         const searchLower = searchTerm.toLowerCase();
         const matches = (
@@ -214,8 +222,10 @@ export default function Homepage() {
       console.log(`🎯 Found ${filtered.length} results across all content types`);
       
       // Group results by type for logging
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const resultsByType = filtered.reduce((acc: any, item) => {
-        acc[item.contentType] = (acc[item.contentType] || 0) + 1;
+        const contentType = String(item.contentType);
+        acc[contentType] = (acc[contentType] || 0) + 1;
         return acc;
       }, {});
       console.log('📈 Results by type:', resultsByType);
@@ -276,6 +286,7 @@ export default function Homepage() {
   const cardSectionheader = data.card_section_header_title;
 
   // Flatten all cards from all card sections
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const allCards = data.cards_section?.flatMap((section: any) => section.card.card) || [];
 
   return (

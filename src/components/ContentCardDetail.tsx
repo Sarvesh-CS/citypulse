@@ -11,34 +11,39 @@ interface ImageObject {
 }
 
 interface ContentCardDetailProps {
-    data: any;
-    name: string;
-    price: string;
-    rating: string;    
-    duration: string;
-    location: string;
-    group_size: string;
-    image: Array<ImageObject>;
-    description: string;
-    button_text: string;
-    button_url: string;
-    isOpen: boolean;
-    onClose: () => void;
+  isOpen: boolean;
+  onClose: () => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  data: any;
+  name: string;
+  price: string;
+  rating: string;
+  duration: string;
+  location: string;
+  group_size: string;
+  image: Array<ImageObject>;
+  description: string;
+  button_text: string;
+  button_url: string;
 }
 
 export default function ContentCardDetail(props: ContentCardDetailProps) {
-    const [currentImageIndex, setCurrentImageIndex] = useState(0);
-    const { withLoading } = useManualLoading();
+  const { isOpen, onClose } = props;
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const { withLoading } = useManualLoading();
+
+  // Destructure props for useEffect dependency
+  const isOpenForEffect = isOpen;
 
     // Handle escape key to close modal
     useEffect(() => {
         const handleEscape = (e: KeyboardEvent) => {
             if (e.key === 'Escape') {
-                props.onClose();
+                onClose();
             }
         };
 
-        if (props.isOpen) {
+        if (isOpenForEffect) {
             document.addEventListener('keydown', handleEscape);
             document.body.style.overflow = 'hidden'; // Prevent background scroll
         }
@@ -47,11 +52,11 @@ export default function ContentCardDetail(props: ContentCardDetailProps) {
             document.removeEventListener('keydown', handleEscape);
             document.body.style.overflow = 'unset';
         };
-    }, [props.isOpen, props.onClose]);
+    }, [isOpenForEffect, onClose]);
 
     const handleCancel = () => {
         console.log('Cancel clicked');
-        props.onClose();
+        onClose();
     };
 
     const handleBookNow = async () => {
@@ -84,11 +89,11 @@ export default function ContentCardDetail(props: ContentCardDetailProps) {
 
     const handleBackdropClick = (e: React.MouseEvent) => {
         if (e.target === e.currentTarget) {
-            props.onClose();
+            onClose();
         }
     };
 
-    if (!props.isOpen) return null;
+    if (!isOpenForEffect) return null;
 
     const currentImage = props.image && props.image.length > 0 ? props.image[currentImageIndex] : null;
 
@@ -97,7 +102,7 @@ export default function ContentCardDetail(props: ContentCardDetailProps) {
             <div className="modal-container">
                 {/* Close Button */}
                 <button 
-                    onClick={props.onClose}
+                    onClick={onClose}
                     className="modal-close-btn"
                     aria-label="Close modal"
                 >

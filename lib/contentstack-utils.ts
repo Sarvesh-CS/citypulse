@@ -1,4 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import * as contentstack from "@contentstack/delivery-sdk";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import * as Utils from "@contentstack/utils";
 import Stack from './contentstack';
 
@@ -6,6 +8,7 @@ import Stack from './contentstack';
 // export { default as stack } from './contentstack';
 
 // Basic wrapper functions - customize these based on your contentstack SDK version
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getEntry(contentTypeUid: string, entryUid: string, references?: string[]): Promise<any> {
   if (!Stack) {
     console.log('Contentstack not configured, returning null');
@@ -18,6 +21,7 @@ export async function getEntry(contentTypeUid: string, entryUid: string, referen
       .query({ uid: entryUid });
     
     const result = await query.find();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const entries = (result as any).entries || [];
 
     if (entries.length > 0) {
@@ -32,6 +36,7 @@ export async function getEntry(contentTypeUid: string, entryUid: string, referen
 }
 
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getEntries(contentTypeUid: string, references?: string[]): Promise<any> {
   if (!Stack) {
     console.log('Contentstack not configured, returning null');
@@ -53,6 +58,7 @@ export async function getEntries(contentTypeUid: string, references?: string[]):
 }
 
 // New function to get page by URL slug
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getPageByUrl(url: string, references?: string[]): Promise<any> {
   if (!Stack) {
     return null;
@@ -62,6 +68,7 @@ export async function getPageByUrl(url: string, references?: string[]): Promise<
         const testQuery = Stack.contentType('content_card_page').entry().includeReference(references || []).query({url: url});
         
         const result = await testQuery.find();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const entries = (result as any).entries || [];
 
         if (entries.length > 0) {
@@ -74,6 +81,7 @@ export async function getPageByUrl(url: string, references?: string[]): Promise<
     } 
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getContentType(contentTypeUid: string): Promise<any> {
   if (!Stack) {
     return null;
@@ -88,6 +96,7 @@ export async function getContentType(contentTypeUid: string): Promise<any> {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getAsset(assetUid: string): Promise<any> {
   if (!Stack) { 
     return null;

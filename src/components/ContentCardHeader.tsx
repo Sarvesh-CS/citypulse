@@ -1,8 +1,9 @@
 "use client"
-import React from 'react'
-import Button from './Button';
+import React from 'react';
+// import Button from './Button'; - unused import
 
-export default function ContentCardHeader({data}: {data: any}) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default function ContentCardHeader({ data }: { data: any }) {
     const header = data.content_card_page_header[0];
   return (
     <div className="content-card-header">

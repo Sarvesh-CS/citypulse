@@ -1,56 +1,68 @@
-import React from "react";
-import ContentCard from "@/components/ContentCard";
-import ContentCardHeader from "@/components/ContentCardHeader";
-import { getPageByUrl } from "../../../lib/contentstack-utils";
-import NotFound from "@/components/NotFound";
+import { notFound } from 'next/navigation';
+import Stack from '../../../lib/contentstack';
+import { getPageByUrl } from '../../../lib/contentstack-utils';
+import ContentCardHeader from '../../components/ContentCardHeader';
+import ContentCard from '../../components/ContentCard';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function fetchPageData(slug: string): Promise<any> {
+  if (!Stack) {
+    return null;
+  }
+
+  try {
+    const result = await getPageByUrl(slug, ["content_card_page_header", "content_cards.content_card.info_card"]);
+    return result;
+  } catch (err) {
+    console.warn('Error fetching page data for slug:', slug, err);
+    return null;
+  }
+}
 
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
-export default async function DynamicPage({ params }: PageProps) {
-    const { slug } = await params;
-    
-    try {
-        // Fetch all pages and filter by slug
-        const pageData = await getPageByUrl(slug, ["content_card_page_header", "header", "content_cards.content_card.info_card"]);
-        
-        // Filter by slug - match against the url field from Contentstack
-        
-        // If no page found, show 404
-        if (!pageData) {
-            return <NotFound slug={slug} />;    
-        }
-        
-        return (
-            <div className="page-container">
-                {/* Page Header */}
-                <ContentCardHeader data={pageData} />
-                
-                {/* Content Cards */}
-                {pageData.content_cards?.map((cardSection: any, index: number) => (
-                    <React.Fragment key={`section-${index}`}>
-                        {cardSection.content_card.info_card.map((tour: any) => (
-                            <ContentCard 
-                                key={tour.uid}
-                                data={pageData} 
-                                name={tour.name} 
-                                price={tour.price} 
-                                rating={tour.rating?.value?.toString() || '0'} 
-                                duration={tour.duration}
-                                location={tour.location}
-                                group_size={tour.group_size}
-                                image={tour.image} 
-                                description={tour.info} 
-                                button_text={tour.book_now_btn} 
-                                button_url="#" 
-                            />
-                        ))}
-                    </React.Fragment>
-                ))}
-            </div>
-        );
-    } catch (error) {
-        return <NotFound slug={slug} />;
-    }
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default async function DynamicPage({ params }: PageProps): Promise<any> {
+  const { slug } = await params;
+  const pageData = await fetchPageData(slug);
+
+  if (!pageData) {
+    notFound();
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header Section */}
+      <ContentCardHeader data={pageData} />
+
+      {/* Content Cards Section */}
+      <section className="py-16">
+        <div className="container mx-auto px-6">
+          <div className="space-y-6">
+            {pageData.content_cards[0].content_card.info_card.map(
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (card: any, index: number) => (
+                <ContentCard
+                  key={card.uid || index}
+                  data={card}
+                  name={card.name}
+                  price={card.price}
+                  rating={card.rating?.value?.toString() || card.rating?.toString() || '0'}
+                  duration={card.duration}
+                  location={card.location}
+                  group_size={card.group_size}
+                  image={card.image}
+                  description={card.description || card.info}
+                  button_text={card.button_text || card.book_now_btn || 'Book Now'}
+                  button_url={card.button_url || '#'}
+                />
+              )
+            )}
+          </div>
+        </div>
+      </section>
+    </div>
+  );
 }

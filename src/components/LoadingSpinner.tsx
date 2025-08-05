@@ -2,10 +2,10 @@
 import React from 'react'
 
 interface LoadingSpinnerProps {
-  isVisible: boolean;
+  isVisible?: boolean;
 }
 
-export default function LoadingSpinner({ isVisible }: LoadingSpinnerProps) {
+export default function LoadingSpinner({ isVisible = true }: LoadingSpinnerProps) {
   if (!isVisible) return null;
 
   return (
