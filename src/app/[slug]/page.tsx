@@ -1,8 +1,11 @@
+
 import { notFound } from 'next/navigation';
 import Stack from '../../../lib/contentstack';
 import { getPageByUrl } from '../../../lib/contentstack-utils';
 import ContentCardHeader from '../../components/ContentCardHeader';
 import ContentCard from '../../components/ContentCard';
+import DummyUserAttr from '../../components/dummyUserAttr';
+
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function fetchPageData(slug: string): Promise<any> {
@@ -28,12 +31,15 @@ export default async function DynamicPage({ params }: PageProps): Promise<any> {
   const { slug } = await params;
   const pageData = await fetchPageData(slug);
 
+
+
   if (!pageData) {
     notFound();
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <DummyUserAttr />
       {/* Header Section */}
       <ContentCardHeader data={pageData} />
 
@@ -57,6 +63,7 @@ export default async function DynamicPage({ params }: PageProps): Promise<any> {
                   description={card.description || card.info}
                   button_text={card.button_text || card.book_now_btn || 'Book Now'}
                   button_url={card.button_url || '#'}
+                  pageSlug={slug}
                 />
               )
             )}

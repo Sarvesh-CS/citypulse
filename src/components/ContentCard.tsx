@@ -1,7 +1,9 @@
 "use client"
 import React, { useState } from 'react'
 import ContentCardDetail from './ContentCardDetail'
+import BookingModal from './BookingModal'
 import { useManualLoading } from '../hooks/useManualLoading'
+import { useBookingData } from '../hooks/useBookingData'
 
 
 interface ImageObject {
@@ -25,13 +27,16 @@ interface ContentCardProps {
   description : string;
   button_text : string;
   button_url : string;
+  pageSlug?: string; // Optional page slug for context
 }
 
 export default function ContentCard(props: ContentCardProps) {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+    const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
     const { withLoading } = useManualLoading();
-   
+    const { bookingData } = useBookingData(props.pageSlug);
+    
     const handleLearnMore = () => {
         console.log('Learn More clicked');
         setIsDetailModalOpen(true);
@@ -41,11 +46,33 @@ export default function ContentCard(props: ContentCardProps) {
         setIsDetailModalOpen(false);
     };
 
-    const handleBookNow = async () => {
-        await withLoading(async () => {
-            console.log('Book Now clicked');
-            await new Promise(resolve => setTimeout(resolve, 2000));
-        });
+    const handleCloseBookingModal = () => {
+        setIsBookingModalOpen(false);
+    };
+
+    // Helper function to determine activity type based on content
+    const getActivityType = (): 'tour' | 'event' | 'hotel' | 'restaurant' => {
+        const name = props?.name?.toLowerCase() || '';
+        const description = props?.description?.toLowerCase() || '';
+        
+        if (name.includes('hotel') || description.includes('hotel') || description.includes('stay')) {
+            return 'hotel';
+        } else if (name.includes('restaurant') || description.includes('dining') || description.includes('food')) {
+            return 'restaurant';
+        } else if (name.includes('event') || description.includes('event') || description.includes('concert')) {
+            return 'event';
+        } else {
+            return 'tour'; // Default to tour
+        }
+    };
+
+    // Use passed pageSlug if available, otherwise extract from pathname
+    const pageSlug = props.pageSlug || (props.button_url ? props.button_url.split('/').pop() : '');
+
+    const handleBookNow = () => {
+        console.log('Book Now clicked - Opening booking modal');
+        setIsBookingModalOpen(true);
+        
     };
 
     const handlePreviousImage = () => {
@@ -201,6 +228,20 @@ export default function ContentCard(props: ContentCardProps) {
                 {...props}
                 isOpen={isDetailModalOpen}
                 onClose={handleCloseModal}
+                pageSlug={pageSlug}
+            />
+
+            {/* Booking Modal */}
+            <BookingModal
+                isOpen={isBookingModalOpen}
+                onClose={handleCloseBookingModal}
+                activityName={props?.name || 'Amazing Activity'}
+                activityType={getActivityType()}
+                activityPrice={props?.price || '$299'}
+                activityImage={currentImage?.url}
+                maxPeople={20}
+                bookingData={bookingData}
+                pageSlug={pageSlug}
             />
         </>
     );

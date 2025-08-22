@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import { getEntry } from "../../lib/contentstack-utils";
 import Footer from "@/components/Footer";
 import LoadingProvider from "@/components/LoadingProvider";
+import { PersonalizationProvider } from "../../lib/personlizeContext";
 
 const headerUid = process.env.NEXT_PUBLIC_HEADER_UID || '';
 const footerUid = process.env.NEXT_PUBLIC_FOOTER_UID || '';
@@ -46,9 +47,11 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <LoadingProvider>
-          <Header data={header} />
-          {children}
-          <Footer data={footer} />
+          <PersonalizationProvider>
+            <Header data={header} />
+            {children}
+            <Footer data={footer} />
+          </PersonalizationProvider>
         </LoadingProvider>
       </body>
     </html>

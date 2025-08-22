@@ -1,6 +1,8 @@
 "use client"
 import React, { useState, useEffect } from 'react'
 import { useManualLoading } from '../hooks/useManualLoading'
+import BookingModal from './BookingModal';
+import { useBookingData } from '../hooks/useBookingData';
 
 interface ImageObject {
     uid: string;
@@ -25,12 +27,15 @@ interface ContentCardDetailProps {
   description: string;
   button_text: string;
   button_url: string;
+  pageSlug?: string; // Page slug for context
 }
 
 export default function ContentCardDetail(props: ContentCardDetailProps) {
   const { isOpen, onClose } = props;
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const { withLoading } = useManualLoading();
+  const { bookingData } = useBookingData(props?.pageSlug);
 
   // Destructure props for useEffect dependency
   const isOpenForEffect = isOpen;
@@ -59,16 +64,29 @@ export default function ContentCardDetail(props: ContentCardDetailProps) {
         onClose();
     };
 
-    const handleBookNow = async () => {
-        await withLoading(async () => {
-            console.log('Book Now clicked');
-            // Simulate API call or navigation
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            
-            // Add actual booking logic here
-            // For example: await bookTour(props.data.id);
-            // Or navigate: router.push('/booking');
-        });
+    const handleBookNow = () => {
+        console.log('Book Now clicked - Opening booking modal');
+        setIsBookingModalOpen(true);
+    };
+
+    const handleCloseBookingModal = () => {
+        setIsBookingModalOpen(false);
+    };
+
+    // Helper function to determine activity type based on content
+    const getActivityType = (): 'tour' | 'event' | 'hotel' | 'restaurant' => {
+        const name = props?.name?.toLowerCase() || '';
+        const description = props?.description?.toLowerCase() || '';
+        
+        if (name.includes('hotel')) {
+            return 'hotel';
+        } else if (name.includes('restaurant')) {
+            return 'restaurant';
+        } else if (name.includes('event')) {
+            return 'event';
+        } else {
+            return 'tour'; // Default to tour
+        }
     };
 
     const handlePreviousImage = () => {
@@ -241,6 +259,19 @@ export default function ContentCardDetail(props: ContentCardDetailProps) {
                     </div>
                 </div>
             </div>
+
+            {/* Booking Modal */}
+            <BookingModal
+                isOpen={isBookingModalOpen}
+                onClose={handleCloseBookingModal}
+                activityName={props?.name || 'Amazing Activity'}
+                activityType={getActivityType()}
+                activityPrice={props?.price || '$299'}
+                activityImage={currentImage?.url}
+                maxPeople={20}
+                bookingData={bookingData}
+                pageSlug={props?.pageSlug}
+            />
         </div>
     );
 } 

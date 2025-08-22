@@ -28,7 +28,7 @@ export default function PopularActivitiesSection({
               key={card.uid || index}
               title={card.card_title}
               description={card.card_subtitle}
-              image={card.card_image?.url || ''}
+              image={card.card_image?.url || null}
               link={card.link?.href || '#'}
             />
           ))}

@@ -505,6 +505,99 @@
   @apply text-red-600;
 }
 
+/* ===== BOOKING MODAL ===== */
+.booking-modal-backdrop {
+  @apply fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 backdrop-blur-sm;
+}
+
+.booking-modal-container {
+  @apply bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden relative;
+}
+
+.booking-modal-close-btn {
+  @apply absolute top-4 right-4 z-10 bg-white/90 hover:bg-white text-gray-700 hover:text-gray-900 p-2 rounded-full shadow-lg transition-all duration-200 hover:scale-110;
+}
+
+.booking-modal-content {
+  @apply max-h-[90vh] overflow-y-auto;
+}
+
+.booking-modal-header {
+  @apply bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6;
+}
+
+.booking-modal-title {
+  @apply text-2xl font-bold mb-4;
+}
+
+.booking-activity-info {
+  @apply flex items-center space-x-4;
+}
+
+.booking-activity-image {
+  @apply w-16 h-16 rounded-lg object-cover;
+}
+
+.booking-activity-name {
+  @apply text-lg font-semibold;
+}
+
+.booking-activity-price {
+  @apply text-blue-100 text-sm;
+}
+
+.booking-form {
+  @apply p-6;
+}
+
+.booking-form-grid {
+  @apply grid grid-cols-1 md:grid-cols-2 gap-6 mb-6;
+}
+
+.booking-form-group {
+  @apply space-y-2;
+}
+
+.booking-form-group-full {
+  @apply md:col-span-2;
+}
+
+.booking-form-label {
+  @apply block text-sm font-medium text-gray-700;
+}
+
+.booking-form-input {
+  @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors;
+}
+
+.booking-form-input:focus {
+  @apply outline-none;
+}
+
+.booking-form-textarea {
+  @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none;
+}
+
+.booking-form-textarea:focus {
+  @apply outline-none;
+}
+
+.booking-total {
+  @apply bg-gray-50 rounded-lg p-4 mb-6;
+}
+
+.booking-total-breakdown {
+  @apply flex justify-between items-center;
+}
+
+.booking-total-price {
+  @apply text-xl font-bold text-blue-600;
+}
+
+.booking-modal-actions {
+  @apply flex gap-4 pt-4 border-t border-gray-200;
+}
+
 /* ===== RESPONSIVE UTILITIES ===== */
 .responsive-nav {
   @apply hidden md:flex items-center space-x-4;

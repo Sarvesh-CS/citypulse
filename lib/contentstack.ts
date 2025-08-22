@@ -15,7 +15,10 @@ if (!apiKey || !deliveryToken) {
 
 // Create stack instance only if environment variables are available
 const Stack = apiKey && deliveryToken ? Contentstack.stack({
-  apiKey: apiKey, deliveryToken: deliveryToken, environment: environment, region: Region.US,
+  apiKey: apiKey, 
+  deliveryToken: deliveryToken, 
+  environment: environment, 
+  region: Region.US,
 }) : null;
 
 export default Stack; 

@@ -7,6 +7,8 @@ import SearchResults from './SearchResults';
 import StatsSection from './StatsSection';
 import PopularActivitiesSection from './PopularActivitiesSection';
 import { useLoading } from '../components/LoadingProvider';
+import { fetchPersonalizedEntry, getActiveExperience, getActiveVariantAliases, initializePersonalize } from '../../lib/personalize';
+
 
 const homePageUid = process.env.NEXT_PUBLIC_HOMEPAGE_UID || '';
 const toursPageUid = process.env.NEXT_PUBLIC_TOURS_PAGE_UID || '';
@@ -14,7 +16,18 @@ const eventsPageUid = process.env.NEXT_PUBLIC_EVENTS_PAGE_UID || '';
 const hotelsPageUid = process.env.NEXT_PUBLIC_HOTELS_PAGE_UID || '';
 const restaurantsPageUid = process.env.NEXT_PUBLIC_RESTAURANTS_PAGE_UID || '';
 
-export default function Homepage() {
+export async function getServerSideProps({ req }: { req: any }) {
+  const cookies = req.headers.cookie || '';
+  const match = cookies.match(/(?:^|; )cs_personalize_uid=([^;]*)/);
+  const userId = match ? decodeURIComponent(match[1]) : null;
+
+  console.log('✅ User ID Homepage:', userId);
+  return {
+    props: { userId },
+  };
+}
+
+export default function Homepage({ userId }: { userId: string }) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [data, setData] = useState<any>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -30,7 +43,6 @@ export default function Homepage() {
   const [filteredResults, setFilteredResults] = useState<any[]>([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
-  
   const { setLoading } = useLoading();
 
   useEffect(() => {
@@ -44,9 +56,29 @@ export default function Homepage() {
           setError('Contentstack not configured - check environment variables');
           return;
         }
+        // Initialize personalize SDK first to avoid race conditions
+        await initializePersonalize();
         
-        // Fetch homepage data
-        const result = await getEntry('home_page', homePageUid, ["cards_section.card.card"]);
+        // Check active Variant alias and experience in parallel
+        const [activeVariantAliases, activeExperience] = await Promise.all([
+          getActiveVariantAliases(),
+          getActiveExperience()
+        ]);
+        
+        console.log('Active variant aliases:', activeVariantAliases[0]);
+        console.log('Active experience:', activeExperience);
+
+        let result;
+        if (activeVariantAliases[0]==="cs_personalize_1_null") {
+          result = await getEntry('home_page', homePageUid, ["cards_section.card.card"]);
+        } else {
+          result = await fetchPersonalizedEntry('home_page', homePageUid, ["cards_section.card.card"], activeVariantAliases[0]);
+          console.log('Personalized content:', result);
+        }
+        
+
+        // // Fetch homepage content
+        // const result = await getEntry('home_page', homePageUid, ["cards_section.card.card"]);
         
         // Fetch tours data (known working UID)
         const toursData = await getEntry('content_card_page', toursPageUid, ["content_card_page_header",  "content_cards.content_card.info_card"]);
@@ -183,6 +215,9 @@ export default function Homepage() {
     }
 
     setLoading(true);
+    
+    // Perform search
+    
     try {
       console.log('🔍 Searching for:', searchTerm);
       
