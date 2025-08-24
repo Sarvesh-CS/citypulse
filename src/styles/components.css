@@ -598,6 +598,101 @@
   @apply flex gap-4 pt-4 border-t border-gray-200;
 }
 
+/* ===== SUCCESS MODAL ===== */
+.success-modal-backdrop {
+  @apply fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50;
+}
+
+.success-modal-container {
+  @apply bg-white rounded-lg shadow-xl w-full max-w-lg overflow-hidden relative;
+}
+
+.success-modal-close-btn {
+  @apply absolute top-4 right-4 z-10 bg-white/90 hover:bg-white text-gray-700 hover:text-gray-900 p-2 rounded-full shadow-lg transition-all duration-200 hover:scale-110;
+}
+
+
+
+.success-modal-content {
+  @apply bg-white rounded-xl overflow-hidden;
+}
+
+.success-modal-header {
+  @apply bg-green-500 text-white text-center py-6 px-6;
+}
+
+.success-icon-wrapper {
+  @apply flex justify-center mb-4;
+}
+
+.success-checkmark {
+  @apply bg-white/20 rounded-full p-3 text-white;
+}
+
+.success-modal-title {
+  @apply text-2xl font-bold mb-2;
+}
+
+.success-modal-subtitle {
+  @apply text-green-100 text-sm;
+}
+
+.booking-success-card {
+  @apply p-3;
+}
+
+.booking-card-title {
+  @apply text-base font-semibold text-gray-800 mb-3 pb-2 border-b border-gray-200;
+}
+
+.booking-details-grid {
+  @apply space-y-2;
+}
+
+.booking-detail-item {
+  @apply flex items-center space-x-3 p-2 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors;
+}
+
+.booking-detail-icon {
+  @apply flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600;
+}
+
+.booking-detail-label {
+  @apply block text-xs font-medium text-gray-500 mb-0.5;
+}
+
+.booking-detail-value {
+  @apply block text-sm font-semibold text-gray-900;
+}
+
+.booking-total-highlight {
+  @apply mt-3 p-2 bg-gradient-to-r from-blue-50 to-green-50 rounded-md border border-green-200;
+}
+
+.booking-total-content {
+  @apply flex items-center space-x-2;
+}
+
+.booking-total-content svg {
+  @apply flex-shrink-0 text-green-600 w-5 h-5;
+}
+
+.booking-total-label {
+  @apply block text-xs font-medium text-gray-600 mb-0.5;
+}
+
+.booking-total-price {
+  @apply block text-lg font-bold text-green-600;
+}
+
+.success-modal-actions {
+  @apply p-3 pt-0;
+}
+
+.success-modal-btn {
+  @apply w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-medium py-3 px-4 rounded-md transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center text-sm;
+}
+
 /* ===== RESPONSIVE UTILITIES ===== */
 .responsive-nav {
   @apply hidden md:flex items-center space-x-4;
