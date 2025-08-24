@@ -4,7 +4,13 @@ import React, { createContext, ReactNode, useContext, useEffect, useState } from
 import Personalize from '@contentstack/personalize-edge-sdk'
 import { Sdk } from '@contentstack/personalize-edge-sdk/dist/sdk'
 
-const personalizeConfiguration: any = {
+interface PersonalizeConfiguration {
+    uid: string;
+    audiences: Record<string, unknown>;
+    taxonomy_path: string;
+}
+
+const personalizeConfiguration: PersonalizeConfiguration = {
     uid: '',
     audiences: {},
     taxonomy_path: ''
@@ -25,7 +31,7 @@ export const usePersonalization = () => {
 // Create a provider component to wrap the application with the Personalization context
 export function PersonalizationProvider({ children }: { children: ReactNode }): React.ReactElement {
 
-    const [personalizeConfig, setPersonalizeConfig] = useState<any | undefined>()
+    const [personalizeConfig, setPersonalizeConfig] = useState<PersonalizeConfiguration | undefined>()
 
     const [isInitialized, setIsInitialized] = useState<boolean>(false)
 

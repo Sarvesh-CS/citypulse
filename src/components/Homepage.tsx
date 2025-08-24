@@ -7,7 +7,19 @@ import SearchResults from './SearchResults';
 import StatsSection from './StatsSection';
 import PopularActivitiesSection from './PopularActivitiesSection';
 import { useLoading } from '../components/LoadingProvider';
-import { fetchPersonalizedEntry, getActiveExperience, getActiveVariantAliases, initializePersonalize } from '../../lib/personalize';
+import { 
+  fetchPersonalizedEntry, 
+  getActiveExperience, 
+  getActiveVariantAliases, 
+  initializePersonalize,
+  getPersonalizationData
+} from '../../lib/personalize';
+import { 
+  fetchIntelligentContent, 
+  fetchBatchIntelligentContent,
+  debugPersonalizationState,
+  PersonalizationData
+} from '../../lib/variant-utils';
 
 
 const homePageUid = process.env.NEXT_PUBLIC_HOMEPAGE_UID || '';
@@ -16,7 +28,7 @@ const eventsPageUid = process.env.NEXT_PUBLIC_EVENTS_PAGE_UID || '';
 const hotelsPageUid = process.env.NEXT_PUBLIC_HOTELS_PAGE_UID || '';
 const restaurantsPageUid = process.env.NEXT_PUBLIC_RESTAURANTS_PAGE_UID || '';
 
-export async function getServerSideProps({ req }: { req: any }) {
+export async function getServerSideProps({ req }: { req: { headers: { cookie?: string } } }) {
   const cookies = req.headers.cookie || '';
   const match = cookies.match(/(?:^|; )cs_personalize_uid=([^;]*)/);
   const userId = match ? decodeURIComponent(match[1]) : null;
@@ -27,7 +39,7 @@ export async function getServerSideProps({ req }: { req: any }) {
   };
 }
 
-export default function Homepage({ userId }: { userId: string }) {
+export default function Homepage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [data, setData] = useState<any>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -59,32 +71,60 @@ export default function Homepage({ userId }: { userId: string }) {
         // Initialize personalize SDK first to avoid race conditions
         await initializePersonalize();
         
-        // Check active Variant alias and experience in parallel
-        const [activeVariantAliases, activeExperience] = await Promise.all([
-          getActiveVariantAliases(),
-          getActiveExperience()
-        ]);
+        // Get personalization data using the improved approach
+        const personalizationData = await getPersonalizationData();
         
-        console.log('Active variant aliases:', activeVariantAliases[0]);
-        console.log('Active experience:', activeExperience);
-
-        let result;
-        if (activeVariantAliases[0]==="cs_personalize_1_null") {
-          result = await getEntry('home_page', homePageUid, ["cards_section.card.card"]);
-        } else {
-          result = await fetchPersonalizedEntry('home_page', homePageUid, ["cards_section.card.card"], activeVariantAliases[0]);
-          console.log('Personalized content:', result);
+        // Debug personalization state (can be removed in production)
+        if (personalizationData) {
+          debugPersonalizationState(personalizationData);
         }
-        
 
-        // // Fetch homepage content
-        // const result = await getEntry('home_page', homePageUid, ["cards_section.card.card"]);
-        
-        // Fetch tours data (known working UID)
-        const toursData = await getEntry('content_card_page', toursPageUid, ["content_card_page_header",  "content_cards.content_card.info_card"]);
-        const eventsData = await getEntry('content_card_page', eventsPageUid, ["content_card_page_header", "content_cards.content_card.info_card"]);
-        const hotelsData = await getEntry('content_card_page', hotelsPageUid, ["content_card_page_header", "content_cards.content_card.info_card"]);
-        const restaurantsData = await getEntry('content_card_page', restaurantsPageUid, ["content_card_page_header", "content_cards.content_card.info_card"]);
+        // Use the new intelligent content fetching for all content
+        const contentRequests = [
+          {
+            id: 'homepage',
+            contentTypeUid: 'home_page',
+            entryUid: homePageUid,
+            referenceFieldPath: ["cards_section.card.card"]
+          },
+          {
+            id: 'tours',
+            contentTypeUid: 'content_card_page',
+            entryUid: toursPageUid,
+            referenceFieldPath: ["content_card_page_header", "content_cards.content_card.info_card"]
+          },
+          {
+            id: 'events',
+            contentTypeUid: 'content_card_page',
+            entryUid: eventsPageUid,
+            referenceFieldPath: ["content_card_page_header", "content_cards.content_card.info_card"]
+          },
+          {
+            id: 'hotels',
+            contentTypeUid: 'content_card_page',
+            entryUid: hotelsPageUid,
+            referenceFieldPath: ["content_card_page_header", "content_cards.content_card.info_card"]
+          },
+          {
+            id: 'restaurants',
+            contentTypeUid: 'content_card_page',
+            entryUid: restaurantsPageUid,
+            referenceFieldPath: ["content_card_page_header", "content_cards.content_card.info_card"]
+          }
+        ];
+
+        // Fetch all content in parallel with intelligent personalization
+        const batchResults = await fetchBatchIntelligentContent(
+          contentRequests,
+          personalizationData || undefined,
+          true // fallback to default content
+        );
+
+        const result = batchResults.homepage;
+        const toursData = batchResults.tours;
+        const eventsData = batchResults.events;
+        const hotelsData = batchResults.hotels;
+        const restaurantsData = batchResults.restaurants;
         
         
         // try {

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useManualLoading } from '../hooks/useManualLoading';
 import { getEntry } from '../../lib/contentstack-utils';
-import { sendConfirmationEmail } from '../services/emailService';
+import { sendConfirmationEmail, BookingDetails } from '../services/emailService';
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -12,8 +12,7 @@ interface BookingModalProps {
   activityPrice: string;
   activityImage?: string;
   maxPeople?: number;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  bookingData?: any; // API response data for booking modal labels
+  bookingData?: Record<string, unknown>; // API response data for booking modal labels
   pageSlug?: string; // Current page slug to customize labels
 }
 
@@ -148,7 +147,7 @@ export default function BookingModal({
       };
 
       // Simulate booking API call
-      const bookingDetails: any = {
+      const bookingDetails: BookingDetails = {
         activityName,
         activityType: getActivityType(),
         activityPrice,
@@ -193,21 +192,21 @@ export default function BookingModal({
     return `$${total.toFixed(2)}`;
   };
 
-  const getModalTitle = () => {
+  const getModalTitle = (): string => {
     // Use API title if available, otherwise use slug-based labels
     if (bookingData?.heading) {
-      return bookingData.heading;
+      return String(bookingData.heading);
     }
     
-    return bookingData?.modal_title || 'Make Booking'; // Fallback to bookingData.modal_title
+    return String(bookingData?.modal_title || 'Make Booking'); // Fallback to bookingData.modal_title
   };
 
-  const getPeopleLabel = () => {
-    return bookingData?.people_label || 'Number of People'; // Fallback to bookingData.people_label
+  const getPeopleLabel = (): string => {
+    return String(bookingData?.people_label || 'Number of People'); // Fallback to bookingData.people_label
   };
 
-  const getDateLabel = () => {
-    return bookingData?.date; // Fallback to bookingData.date_label
+  const getDateLabel = (): string => {
+    return String(bookingData?.date || 'Date'); // Fallback to bookingData.date_label
   };
 
   // Get minimum date (today)
@@ -331,14 +330,14 @@ export default function BookingModal({
               {/* Customer Name */}
               <div className="booking-form-group">
                 <label htmlFor="customer-name" className="booking-form-label">
-                  {bookingData?.full_name || 'Full Name'} *
+                  {String(bookingData?.full_name || 'Full Name')} *
                 </label>
                 <input
                   type="text"
                   id="customer-name"
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
-                  placeholder={`Enter your ${bookingData?.full_name?.toLowerCase() || 'full name'}`}
+                  placeholder={`Enter your ${String(bookingData?.full_name || '').toLowerCase() || 'full name'}`}
                   className="booking-form-input"
                   required
                 />
@@ -347,14 +346,14 @@ export default function BookingModal({
               {/* Customer Email */}
               <div className="booking-form-group">
                 <label htmlFor="customer-email" className="booking-form-label">
-                  {bookingData?.email_address || 'Email Address'} *
+                  {String(bookingData?.email_address || 'Email Address')} *
                 </label>
                 <input
                   type="email"
                   id="customer-email"
                   value={customerEmail}
                   onChange={(e) => setCustomerEmail(e.target.value)}
-                  placeholder={`Enter your ${bookingData?.email_address?.toLowerCase() || 'email'}`}
+                  placeholder={`Enter your ${String(bookingData?.email_address || '').toLowerCase() || 'email'}`}
                   className="booking-form-input"
                   required
                 />
@@ -363,14 +362,14 @@ export default function BookingModal({
               {/* Customer Phone */}
               <div className="booking-form-group">
                 <label htmlFor="customer-phone" className="booking-form-label">
-                  {bookingData?.phone_number || 'Phone Number'} *
+                  {String(bookingData?.phone_number || 'Phone Number')} *
                 </label>
                 <input
                   type="tel"
                   id="customer-phone"
                   value={customerPhone}
                   onChange={(e) => setCustomerPhone(e.target.value)}
-                  placeholder={`Enter your ${bookingData?.phone_number?.toLowerCase() || 'phone number'}`}
+                  placeholder={`Enter your ${String(bookingData?.phone_number || '').toLowerCase() || 'phone number'}`}
                   className="booking-form-input"
                   required
                 />
@@ -379,7 +378,7 @@ export default function BookingModal({
               {/* Special Requests */}
               <div className="booking-form-group booking-form-group-full">
                 <label htmlFor="special-requests" className="booking-form-label">
-                  {bookingData?.special_requests || 'Special Requests (Optional)'}
+                  {String(bookingData?.special_requests || 'Special Requests (Optional)')}
                 </label>
                 <textarea
                   id="special-requests"
@@ -396,7 +395,7 @@ export default function BookingModal({
             <div className="booking-total">
               <div className="booking-total-breakdown">
                 <span>
-                  {bookingData?.total_prefix || 'Total for '}
+                  {String(bookingData?.total_prefix || 'Total for ')}
                   {peopleCount} {peopleCount === 1 ? 'person' : 'people'}:
                 </span>
                 <span className="booking-total-price">{calculateTotalPrice()}</span>
@@ -409,13 +408,13 @@ export default function BookingModal({
                 onClick={handleCancel}
                 className="btn-cancel"
               >
-                {bookingData?.cancel_btn || 'Cancel'}
+                {String(bookingData?.cancel_btn || 'Cancel')}
               </button>
               <button
                 onClick={handleBookNow}
                 className="btn-book"
               >
-                {bookingData?.confirm_booking_btn}
+                {String(bookingData?.confirm_booking_btn || 'Confirm Booking')}
               </button>
             </div>
           </div>

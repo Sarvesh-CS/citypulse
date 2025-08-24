@@ -5,7 +5,7 @@ interface HeroSectionProps {
   title: string;
   subtitle?: string;
   description?: string;
-  exploreBtn?: { title: string };
+  exploreBtn?: { title: string; href: string };
   learnMoreBtn?: { title: string; href: string };
   searchTerm: string;
   onSearchTermChange: (term: string) => void;
@@ -53,7 +53,7 @@ export default function HeroSection({
           {exploreBtn?.title && (
             <Button 
               text={exploreBtn.title}
-              href="#section-2"
+              href={exploreBtn.href}
               className="bg-blue-600 text-white hover:bg-blue-700 px-8 py-3 rounded-lg font-medium transition-colors shadow-lg"
             />
           )}

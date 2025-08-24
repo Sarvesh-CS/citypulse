@@ -44,7 +44,7 @@ export default function Header({ data }: HeaderProps) {
     }
 
     const logo = data.logo || 'CityPulse';
-    const joinBtn = data.join || { title: 'Join', href: '#' };
+    // const joinBtn = data.join || { title: 'Join', href: '#' };
     
     // Parse navigation links from Contentstack data structure
     // The data.links object contains navigation items like: { events: { title, href }, hotels: { title, href } }
@@ -82,11 +82,11 @@ export default function Header({ data }: HeaderProps) {
                   </Link>
                 </li>
               ))}
-              <li className="header-nav-item">
+              {/* <li className="header-nav-item">
                 <a href={joinBtn.href} className="btn btn-primary">
                   {joinBtn.title}
                 </a>
-              </li>
+              </li> */}
             </ul>
           </nav>
         </div>
